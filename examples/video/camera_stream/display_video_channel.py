@@ -14,6 +14,7 @@ import time
 from queue import Queue
 from go2_webrtc_driver.webrtc_driver import Go2WebRTCConnection, WebRTCConnectionMethod
 from aiortc import MediaStreamTrack
+from go2_webrtc_driver.constants import RTC_TOPIC, VUI_COLOR
 
 # Enable logging for debugging
 logging.basicConfig(level=logging.FATAL)
@@ -22,10 +23,10 @@ def main():
     frame_queue = Queue()
 
     # Choose a connection method (uncomment the correct one)
-    conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, ip="192.168.8.181")
+    conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, ip="unitree.local")
     # conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, serialNumber="B42D2000XXXXXXXX")
     # conn = Go2WebRTCConnection(WebRTCConnectionMethod.Remote, serialNumber="B42D2000XXXXXXXX", username="email@gmail.com", password="pass")
-    # conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalAP)
+    #conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalAP)
 
     # Async function to receive video frames and put them in the queue
     async def recv_camera_stream(track: MediaStreamTrack):
@@ -41,6 +42,20 @@ def main():
             try:
                 # Connect to the device
                 await conn.connect()
+
+                brightness_level = 10
+
+                await conn.datachannel.pub_sub.publish_request_new(
+                    RTC_TOPIC["VUI"], 
+                    {
+                        "api_id": 1005,
+                        "parameter": {"brightness": brightness_level}
+                    }
+                )
+                print(f"Brightness level: {brightness_level}/10")
+                await asyncio.sleep(0.5)
+
+
 
                 # Switch video channel on and start receiving video frames
                 conn.video.switchVideoChannel(True)

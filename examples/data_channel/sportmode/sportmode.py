@@ -11,10 +11,10 @@ logging.basicConfig(level=logging.FATAL)
 async def main():
     try:
         # Choose a connection method (uncomment the correct one)
-        conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, ip="192.168.8.181")
+        #conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, ip="192.168.8.181")
         # conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, serialNumber="B42D2000XXXXXXXX")
         # conn = Go2WebRTCConnection(WebRTCConnectionMethod.Remote, serialNumber="B42D2000XXXXXXXX", username="email@gmail.com", password="pass")
-        # conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalAP)
+        conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalAP)
 
         # Connect to the WebRTC service.
         await conn.connect()
@@ -77,6 +77,19 @@ async def main():
         )
 
         await asyncio.sleep(3)
+
+        # Perform a "Move Backward" movement
+        print("Moving side...")
+        await conn.datachannel.pub_sub.publish_request_new(
+            RTC_TOPIC["SPORT_MOD"], 
+            {
+                "api_id": SPORT_CMD["Move"],
+                "parameter": {"x": 0, "y": -0.5, "z": 0}
+            }
+        )
+
+        await asyncio.sleep(3)
+
 
         ####### AI MODE ########
 

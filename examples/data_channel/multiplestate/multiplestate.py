@@ -41,10 +41,10 @@ def display_data(message):
 async def main():
     try:
         # Choose a connection method (uncomment the correct one)
-        conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, ip="192.168.8.181")
+        conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, ip="192.168.0.56")
         # conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalSTA, serialNumber="B42D2000XXXXXXXX")
         # conn = Go2WebRTCConnection(WebRTCConnectionMethod.Remote, serialNumber="B42D2000XXXXXXXX", username="email@gmail.com", password="pass")
-        # conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalAP)
+        #conn = Go2WebRTCConnection(WebRTCConnectionMethod.LocalAP)
 
         # Connect to the WebRTC service.
         await conn.connect()
