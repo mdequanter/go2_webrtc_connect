@@ -59,7 +59,7 @@ async def main():
         await conn.datachannel.pub_sub.publish_request_new(
             RTC_TOPIC["SPORT_MOD"], 
             {
-                "api_id": SPORT_CMD["Move"],
+                "api_id": SPORT_CMD["StopMove"],
                 "parameter": {"x": 0.5, "y": 0, "z": 0}
             }
         )
@@ -71,7 +71,7 @@ async def main():
         await conn.datachannel.pub_sub.publish_request_new(
             RTC_TOPIC["SPORT_MOD"], 
             {
-                "api_id": SPORT_CMD["Move"],
+                "api_id": SPORT_CMD["StopMove"],
                 "parameter": {"x": -0.5, "y": 0, "z": 0}
             }
         )
