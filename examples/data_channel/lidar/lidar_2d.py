@@ -7,47 +7,55 @@ import json
 import matplotlib.pyplot as plt
 
 # Variabelen om de robotpositie bij te houden
-robot_x, robot_y = None, None
+robot_x, robot_y, robot_y = None, None, None
 
-def plot_point_cloud(ax, positions, robot_x=None, robot_y=None):
+import numpy as np
+import matplotlib.pyplot as plt
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def plot_point_cloud(ax, positions, robot_x=None, robot_y=None, robot_w=None):
     """
     Visualiseer een 2D-puntwolk op basis van x- en y-coördinaten,
-    en voeg een rode stip toe op de robotpositie.
+    en voeg een bolletje toe op een specifieke positie en detecteer objecten binnen een straal van 25 cm.
 
     :param ax: De as van de bestaande figuur.
     :param positions: Een numpy-array van vorm (n, 3) met de x-, y-, z-coördinaten van punten.
     :param robot_x: De x-coördinaat van de robot.
     :param robot_y: De y-coördinaat van de robot.
+    :param robot_w: De richting van de robot in radialen.
     """
     ax.clear()
 
+    posOnMapX = 60
+    posOnMapY = 60 - robot_y
+
     # Filter de punten die zich vooraan bevinden (bijvoorbeeld: alleen punten met een positieve x-waarde)
-    front_positions = positions[positions[:, 0] > 0]
-
-    # Controleer of er obstakels zijn op minder dan 0.5 meter
-    close_obstacles = front_positions[np.linalg.norm(front_positions[:, :2], axis=1) < 0.5]
-    if len(close_obstacles) > 0:
-        print("Waarschuwing: Obstakel gedetecteerd binnen 0.5 meter!")
-
+    front_positions = positions[(positions[:, 2] >= 15) & (positions[:, 2] <= 20)]
+    
     # Plot alleen de x- en y-coördinaten van de gefilterde puntwolk
-    ax.scatter(front_positions[:, 0], front_positions[:, 1], color='blue', s=2, label='Points')
+    ax.scatter(front_positions[:, 0], front_positions[:, 1], color='blue', s=1, label='Points')
 
-    # Voeg een rode stip toe op de robotpositie indien beschikbaar
-    if robot_x is not None and robot_y is not None:
-        ax.scatter(robot_x, robot_y, color='red', s=50, label='Robot Position')
+    # Voeg een bolletje toe op het punt (60, 60)
+    ax.scatter(posOnMapX, posOnMapY, color='green', s=50, label='Robot Position')  # Groen bolletje op (60, 60)
+
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_title('2D Point Cloud')
     plt.legend()
     plt.draw()
-    plt.pause(0.01)
+    plt.pause(0.2)
+
+
+
 
 # Enable logging for debugging
 logging.basicConfig(level=logging.FATAL)
     
 async def main():
-    global robot_x, robot_y  # Maak de robotpositie beschikbaar in main()
+    global robot_x, robot_y,robot_w  # Maak de robotpositie beschikbaar in main()
 
     try:
         # Kies een connectiemethode (de correcte decommentariëren)
@@ -73,15 +81,15 @@ async def main():
             positions = positions.reshape(-1, 3)
 
             # Visualisatie aanroepen met de huidige robotpositie
-            plot_point_cloud(ax, positions, robot_x, robot_y)
+            plot_point_cloud(ax, positions, robot_x, robot_y, robot_w)
 
         def pose_callback(message):
             # Update de robotpositie met de ontvangen waarden
-            global robot_x, robot_y
+            global robot_x, robot_y, robot_w
             robot_x = message['data']['pose']['position']['x']
             robot_y = message['data']['pose']['position']['y']
-            w = message['data']['pose']['orientation']['w']
-            print(f"x: {robot_x}, y: {robot_y}, w: {w}")
+            robot_w = message['data']['pose']['orientation']['w']
+            #print(f"x: {robot_x}, y: {robot_y}, w: {robot_w}")
   
         # Abonneer op de LIDAR voxel map data en gebruik de callback-functie om inkomende berichten te verwerken.
         conn.datachannel.pub_sub.subscribe("rt/utlidar/voxel_map_compressed", lidar_callback)
